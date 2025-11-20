@@ -3,7 +3,7 @@ import os
 import pickle
 import csv
 
-def processing_csv_to_numpy(input_filepath):
+def process_csv_to_numpy(input_filepath):
     print(f"Starting to process CSV file: {input_filepath}")
 
     user_map = {}
