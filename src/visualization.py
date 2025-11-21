@@ -40,8 +40,6 @@ def plot_long_tail(data, column_index=1, entity_name="Products"):
     plt.ylabel("Number of Ratings", fontsize=12)
     
     # Use Log scale because Amazon data is usually power-law distributed
-    plt.yscale("log")
-    plt.xscale("log")
     plt.grid(True, which="both", ls="-", alpha=0.4)
     
     plt.show()
@@ -51,14 +49,15 @@ def plot_popularity_vs_quantity(data):
 
     product_ids = data[:, 1].astype(int)
     ratings = data[:, 2]
-
+    # Calculate popularity and quality per product
     products, product_counts = np.unique(product_ids, return_counts=True)
 
     max_id = products.max()
     sum_ratings = np.zeros(max_id + 1)
 
+    # sum of ratings per product (vectorization)
     np.add.at(sum_ratings, product_ids, ratings)
-    # Extract only the relevant sums (for existing items)
+    # Extract only the relevant sums
     relevant_sums = sum_ratings[products]
     mean_ratings = relevant_sums / product_counts
 
@@ -68,7 +67,7 @@ def plot_popularity_vs_quantity(data):
     plt.axhline(y=global_mean, color="red", linestyle="--", label=f"Global Mean: {global_mean:.2f}", linewidth=2)
 
     plt.title("Correlation: Popularity (Count) vs Quality (Mean Rating)", fontsize=16)
-    plt.xlabel("Number of Ratings (Popularity)", fontsize=12)
+    plt.xlabel("Number of Ratings (Popularity-Scaled)", fontsize=12)
     plt.ylabel("Average Rating (Quality)", fontsize=12)
     plt.xscale("log")
     plt.legend()
@@ -82,7 +81,7 @@ def plot_temporal_trends(data):
     # convert to years
     years = 1970 + (timestamps / 31536000)
 
-    plt.hist(years, bins=30, color="teal", alpha=0.7, edgecolor="white")
+    plt.hist(years, bins=int(years.max() - years.min()), color="teal", alpha=0.7, edgecolor="white")
 
     plt.title("Rating Volume Over Time", fontsize=16)
     plt.xlabel("Year", fontsize=12)
