@@ -106,5 +106,69 @@ def filter_k_core(data, k=5):
             break
     return filtered_data
 
+def add_time_features(data):
+    """
+    Adds 'Year' and 'Time_Weight'.
+    Time_Weight is scaled from 0.2 to 1.0 based on recency.
+    Returns: Enhanced Matrix (N, 6) -> [User, Item, Rating, Time, Year, Weight]
+    """
+    timestamps = data[:, 3].astype(int)
+    years = 1970 + (timestamps / 31536000)
 
- 
+    min_time, max_time = timestamps.min(), timestamps.max()
+    time_weights = 0.2 + 0.8 * (timestamps - min_time) / (max_time - min_time)
+
+    enhanced_data = np.hstack((data, years.reshape(-1, 1), time_weights.reshape(-1, 1)))
+    return enhanced_data
+
+def perform_hypothesis_test(data, year_a=2013, year_b=2014):
+    """Performs Z-Test comparing ratings between two years."""
+    print(f"\nPerforming Z-Test: Ratings in {year_b} > {year_a}?")
+    print("H0: Mean_B - Mean_A = 0 | H1: Mean_B - Mean_A > 0")
+    
+    # Year is at index 4
+    years_col = data[:, 4].astype(int)
+    ratings_a = data[years_col == year_a, 2]
+    ratings_b = data[years_col == year_b, 2]
+    
+    if len(ratings_a) == 0 or len(ratings_b) == 0:
+        print("Error: Not enough data for specified years.")
+        return
+
+    mean_a, var_a, n_a = np.mean(ratings_a), np.var(ratings_a), len(ratings_a)
+    mean_b, var_b, n_b = np.mean(ratings_b), np.var(ratings_b), len(ratings_b)
+    
+    print(f"   {year_a}: Mean={mean_a:.4f}, N={n_a}")
+    print(f"   {year_b}: Mean={mean_b:.4f}, N={n_b}")
+    
+    # Z-score calculation
+    pooled_se = np.sqrt((var_b / n_b) + (var_a / n_a))
+    z_score = (mean_b - mean_a) / pooled_se
+    
+    print(f"   Z-Score: {z_score:.4f}")
+    if z_score > 1.645: 
+        print("   Result: Reject H0. Statistically Significant.")
+    else:
+        print("   Result: Fail to reject H0.")
+
+def standardize_ratings(data):
+    ratings = data[:, 2]
+    mean_rating = np.mean(ratings)
+    std_rating = np.std(ratings)
+
+    standardized_ratings = (ratings - mean_rating) / std_rating
+    standardized_data = data.copy()
+    standardized_data[:, 2] = standardized_ratings
+
+    return standardized_data
+
+def split_train_test(data, train_ratio=0.2):
+    """Splits data based on Timestamp."""
+    sorted_indices = np.argsort(data[:, 3])
+    data_sorted = data[sorted_indices]
+
+    num_train = int(len(data) * train_ratio)
+    train_data = data_sorted[:num_train]
+    test_data = data_sorted[num_train:]
+
+    return train_data, test_data
