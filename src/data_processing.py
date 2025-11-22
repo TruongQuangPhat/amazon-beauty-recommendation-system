@@ -56,7 +56,7 @@ def save_processed_data(data_matrix, user_map, product_map, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    data_filepath = os.path.join(output_dir, "ratings_data.npy")
+    data_filepath = os.path.join(output_dir, "data_processed.npy")
     np.save(data_filepath, data_matrix)
     print(f"Saved data matrix to {data_filepath}")
 
@@ -69,7 +69,7 @@ def save_processed_data(data_matrix, user_map, product_map, output_dir):
     print(f"Saved user and product maps to {output_dir}")
 
 def load_processed_data(input_dir):
-    data_filepath = os.path.join(input_dir, "ratings_data.npy")
+    data_filepath = os.path.join(input_dir, "data_processed.npy")
     user_map_filepath = os.path.join(input_dir, "user_map.pkl")
     product_map_filepath = os.path.join(input_dir, "product_map.pkl")
 
@@ -160,9 +160,9 @@ def standardize_ratings(data):
     standardized_data = data.copy()
     standardized_data[:, 2] = standardized_ratings
 
-    return standardized_data
+    return standardized_data, mean_rating, std_rating
 
-def split_train_test(data, train_ratio=0.2):
+def split_train_test(data, train_ratio=0.8):
     """Splits data based on Timestamp."""
     sorted_indices = np.argsort(data[:, 3])
     data_sorted = data[sorted_indices]
