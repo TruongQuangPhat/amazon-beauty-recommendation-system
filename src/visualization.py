@@ -5,7 +5,7 @@ import numpy as np
 def plot_rating_distribution(data):
     plt.figure(figsize=(10, 6))
     
-    ratings = data[:, 2]
+    ratings = data[:, 2].astype(np.float32)
     unique_ratings, counts = np.unique(ratings, return_counts=True)
     
     # Color palette for ratings 1-5
@@ -47,21 +47,17 @@ def plot_long_tail(data, column_index=1, entity_name="Products"):
 def plot_popularity_vs_quantity(data):
     plt.figure(figsize=(10, 6))
 
-    product_ids = data[:, 1].astype(int)
-    ratings = data[:, 2]
+    product_ids = data[:, 1]
+    ratings = data[:, 2].astype(np.float32)
     # Calculate popularity and quality per product
-    products, product_counts = np.unique(product_ids, return_counts=True)
+    unique_products, encoded_indices, counts = np.unique(product_ids, return_inverse=True, return_counts=True)
 
-    max_id = products.max()
-    sum_ratings = np.zeros(max_id + 1)
+    sum_ratings = np.zeros(len(unique_products))
+    np.add.at(sum_ratings, encoded_indices, ratings)
 
-    # sum of ratings per product (vectorization)
-    np.add.at(sum_ratings, product_ids, ratings)
-    # Extract only the relevant sums
-    relevant_sums = sum_ratings[products]
-    mean_ratings = relevant_sums / product_counts
+    mean_ratings = sum_ratings / counts
 
-    sns.scatterplot(x=product_counts, y=mean_ratings, color="purple", alpha=0.6, s=15)
+    sns.scatterplot(x=counts, y=mean_ratings, color="purple", alpha=0.6, s=15)
 
     global_mean = np.mean(ratings)
     plt.axhline(y=global_mean, color="red", linestyle="--", label=f"Global Mean: {global_mean:.2f}", linewidth=2)
@@ -92,8 +88,8 @@ def plot_temporal_trends(data):
 def plot_user_consistency(data):
     plt.figure(figsize=(10, 6))
 
-    user_ids = data[:, 0].astype(int)
-    ratings = data[:, 2]
+    user_ids = data[:, 0]
+    ratings = data[:, 2].astype(np.float32)
 
     global_mean = np.mean(ratings)
     # RMSE calculation
@@ -101,30 +97,27 @@ def plot_user_consistency(data):
     print(f"Global Mean Rating: {global_mean:.4f}")
     print(f"Baseline RMSE (Predict Global Mean): {naive_rmse:.4f}")
 
-    users, user_counts = np.unique(user_ids, return_counts=True)
-    max_user_id = user_ids.max()
+    unique_users, encoded_indices, counts = np.unique(user_ids, return_inverse=True, return_counts=True)
+    num_unique = len(unique_users)
 
     # sum of ratings per user
-    sum_ratings = np.zeros(max_user_id + 1)
-    np.add.at(sum_ratings, user_ids, ratings)
+    sum_ratings = np.zeros(num_unique)
+    np.add.at(sum_ratings, encoded_indices, ratings)
 
     # sum of squared ratings per user
-    sum_squared_ratings = np.zeros(max_user_id + 1)
-    np.add.at(sum_squared_ratings, user_ids, ratings ** 2)
+    sum_squared_ratings = np.zeros(num_unique)
+    np.add.at(sum_squared_ratings, encoded_indices, ratings ** 2)
 
     # Filter only users with >= 2 ratings (to calculate std dev)
-    valid_indices = users[user_counts >= 2]
-    valid_counts = user_counts[user_counts >= 2]
+    valid_mask = counts >= 2
+    valid_sums = sum_ratings[valid_mask]
+    valid_sum_sq = sum_squared_ratings[valid_mask]
+    valid_counts = counts[valid_mask]
 
-    valid_sum = sum_ratings[valid_indices]
-    valid_sum_squared = sum_squared_ratings[valid_indices]
-
-    # mean of squared ratings
-    mean_squared = valid_sum_squared / valid_counts
-    # Square of mean ratings
-    squared_mean = (valid_sum / valid_counts) ** 2
-    # Variance = Mean(X^2) - Mean(X)^2
-    variance = np.abs(mean_squared - squared_mean)
+    # calculate std dev per user
+    mean_sq = valid_sum_sq / valid_counts
+    sq_mean = (valid_sums / valid_counts) ** 2
+    variance = np.abs(mean_sq - sq_mean)
     user_std_devs = np.sqrt(variance)
 
     plt.hist(user_std_devs, bins=30, color="#8e44ad", alpha=0.7, edgecolor="white")
