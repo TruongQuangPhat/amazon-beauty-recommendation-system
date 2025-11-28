@@ -11,7 +11,7 @@ def plot_rating_distribution(data):
     # Color palette for ratings 1-5
     colors = ['#d9534f', '#f0ad4e', '#5bc0de', '#0275d8', '#5cb85c']
     
-    ax = sns.barplot(x=unique_ratings, y=counts, palette=colors)
+    ax = sns.barplot(x=unique_ratings, y=counts, hue=unique_ratings, palette=colors, legend=False)
     
     plt.title("Distribution of Ratings", fontsize=16)
     plt.xlabel("Rating Score", fontsize=12)

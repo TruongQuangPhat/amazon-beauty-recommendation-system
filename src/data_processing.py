@@ -68,7 +68,6 @@ def load_processed_data(input_dir):
 def filter_k_core_iterative(data, k=5):
     """
     Optimized K-Core Filtering using Integer Encoding and Bincount.
-    Speed up: ~50x faster than using np.unique on object arrays.
     """
     
     # ENCODE STRING -> INT 
