@@ -80,6 +80,7 @@ Mô hình phân rã ma trận Rating ($R$) thành hai ma trận ẩn $P$ (User) 
 - **Tối ưu hóa:** Cài đặt thủ công vòng lặp**Stochastic Gradient Descent (SGD)**. Trong mỗi epoch, dữ liệu được xáo trộn (`shuffle`) và cập nhật trọng số từng mẫu một.
 ### Installation & Setup
 Dự án yêu cầu Python phiên bản 3.8 trở lên. Khuyến khích sử dụng môi trường ảo để tránh xung đột thư viện.
+
 **Bước 1: Clone repository**
 Tải mã nguồn dự án về máy của bạn:
 ```bash
