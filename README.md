@@ -83,7 +83,7 @@ Dự án yêu cầu Python phiên bản 3.8 trở lên. Khuyến khích sử d�
 **Bước 1: Clone repository**
 Tải mã nguồn dự án về máy của bạn:
 ```bash
-git clone https://github.com/TruongQuangPhat/amazon-beauty-recommendation-system.git
+git clone https://github.com/TruongQuangPhat/amazon-beauty-recsys.git
 cd amazon-beauty-recsys
 ```
 **Bước 2: Tạo và Kích hoạt môi trường ảo (Virtual Environment)**
